@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <!-- Kafka Appender -->
+        <Kafka name="KafkaAppender">
+            <Property name="bootstrap.servers">localhost:9092</Property>
+            <Property name="topic">logs</Property>
+            <Property name="linger.ms">0</Property>
+            <Property name="batch.size">1</Property>
+            <JsonLayout complete="true" compact="false"/>
+        </Kafka>
+    </Appenders>
+
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="KafkaAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
