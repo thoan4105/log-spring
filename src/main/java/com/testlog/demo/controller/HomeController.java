@@ -27,7 +27,7 @@ public class HomeController {
         System.out.println(log.getClass().getName());
         try {
             String jsonLog = objectMapper.writeValueAsString(createSystemLog());
-            log.info("System log: {}", jsonLog);
+            log.info( "{}", jsonLog);
         } catch (Exception e) {
             log.error("Error converting log to JSON", e);
         }

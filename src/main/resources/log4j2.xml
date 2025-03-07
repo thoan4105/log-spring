@@ -1,25 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="DEBUG">
+<Configuration status="WARN">
     <Appenders>
-        <!-- Console Appender -->
+        <!-- Console Appender (đồng bộ) -->
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
 
-        <!-- Kafka Appender -->
-        <Kafka name="KafkaAppender">
+        <!-- Kafka Appender (sẽ được bọc trong AsyncAppender) -->
+        <Kafka name="KafkaAppender" topic="logs">
             <Property name="bootstrap.servers">localhost:9092</Property>
-            <Property name="topic">logs</Property>
-            <Property name="linger.ms">0</Property>
-            <Property name="batch.size">1</Property>
-            <JsonLayout complete="true" compact="false"/>
+            <Property name="linger.ms">5000</Property> <!-- Gom batch -->
+            <Property name="batch.size">16384</Property> <!-- 16KB -->
+            <Property name="buffer.memory">33554432</Property> <!-- 32MB -->
+            <Property name="acks">1</Property> <!-- Xác nhận từ 1 broker -->
+            <JsonLayout complete="false" compact="false"/>
         </Kafka>
+
+        <!-- Async Appender bọc KafkaAppender -->
+        <Async name="AsyncKafkaAppender">
+            <AppenderRef ref="KafkaAppender"/>
+            <!-- (Tùy chọn) Cấu hình hàng đợi -->
+            <Property name="queueFullPolicy">Drop</Property> <!-- Bỏ log khi queue đầy -->
+            <Property name="bufferSize">1024</Property> <!-- Kích thước queue: 1024 log -->
+        </Async>
     </Appenders>
 
     <Loggers>
-        <Root level="DEBUG">
+        <Logger name="com.testlog.demo.config.KafkaLogConsumer" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="KafkaAppender"/>
+        </Logger>
+
+        <!-- Chỉ log INFO từ package của bạn -->
+        <Logger name="com.testlog.demo" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/> <!-- Gửi đồng bộ tới Console -->
+            <AppenderRef ref="AsyncKafkaAppender"/> <!-- Gửi bất đồng bộ tới Kafka -->
+        </Logger>
+
+        <!-- Đặt mức WARN cho Spring và Tomcat -->
+        <Logger name="org.springframework" level="WARN"/>
+        <Logger name="org.apache" level="WARN"/>
+
+        <!-- Root logger mặc định là WARN -->
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AsyncKafkaAppender"/>
         </Root>
     </Loggers>
 </Configuration>

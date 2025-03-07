@@ -18,7 +18,7 @@ public class KafkaLogProducer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        logger.info("Application started, sending logs to Kafka...");
-        kafkaTemplate.send("logs", "Log message from Spring Boot with Log4j2");
+//        logger.info("Application started, sending logs to Kafka...");
+//        kafkaTemplate.send("logs", "Log message from Spring Boot with Log4j2");
     }
 }
